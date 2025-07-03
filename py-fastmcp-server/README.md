@@ -23,14 +23,14 @@ pipx install uv
 - 创建并同步环境
 
 ```shell
+cd py-fastmcp-server
+
 uv sync
 ```
 
 - 服务端
 
 ```shell
-cd py-mcp-server
-
 # 运行服务端
 uv run mcp dev app/server.py
 
