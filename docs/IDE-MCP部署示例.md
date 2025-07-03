@@ -46,6 +46,22 @@
 }
 ```
 
+### Python Package
+
+将包发布到 Pypi 上, 自行拉取与本地运行
+
+```json
+"py-fastmcp-server": {
+    "name": "py-fastmcp-server",
+    "type": "stdio",
+    "command": "uvx",
+    "args": [
+    "--directory",
+    "py-fastmcp-server",
+    ]
+}
+```
+
 ## Cline
 
 ### Cline STDIO
