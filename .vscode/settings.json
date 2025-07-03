@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "rust-analyzer.linkedProjects": [
+    ],
+    "rust-analyzer.cargo.extraEnv": {
+    },
+}
