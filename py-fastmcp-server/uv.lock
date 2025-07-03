@@ -251,7 +251,7 @@ wheels = [
 ]
 
 [[package]]
-name = "py-mcp-server"
+name = "py-fastmcp-server"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

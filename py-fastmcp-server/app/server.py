@@ -2,13 +2,22 @@
 
 from mcp.server.fastmcp import FastMCP, Image
 from mcp.server.fastmcp.prompts import base
+from mcp.server.fastmcp.server import Settings
 import httpx
 from pydantic import BaseModel, Field
 from PIL import Image as PILImage
 
 
+# 该配置为生效
+settings = Settings(
+    host="127.0.0.1",  # 服务器主机地址
+    port=8000,  # 服务器端口
+    debug=True,  # 调试模式
+)
+print(settings)
+
 # Create an MCP server
-mcp = FastMCP("Demo")
+mcp = FastMCP("Demo", settings=settings)
 
 
 # Add a dynamic greeting resource
@@ -96,4 +105,6 @@ def create_thumbnail(image_path: str) -> Image:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    # transport: Literal["stdio", "sse", "streamable-http"]
+    # mcp.run(transport="streamable-http")
+    mcp.run(transport="streamable-http")
