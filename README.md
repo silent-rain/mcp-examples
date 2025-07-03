@@ -4,7 +4,7 @@
 
 ## 项目
 
-- [py-mcp-server](py-mcp-server/README.md)
+- [Python FastMCP Server](./py-fastmcp-server/README.md)
 
 ## 参考资料
 
