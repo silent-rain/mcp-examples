@@ -20,6 +20,12 @@ pipx install uv
 
 ### 开发模式
 
+- 创建并同步环境
+
+```shell
+uv sync
+```
+
 - 服务端
 
 ```shell
@@ -156,6 +162,51 @@ async def long_task(files: list[str], ctx: Context) -> str:
 ### Completions
 
 MCP 支持为提示参数和资源模板参数提供补全建议。使用 context 参数，服务器可以根据先前解析的值提供补全建议
+
+## MCP 协议
+
+### 可流式传输的 HTTP 传输
+
+- 注意：在生产部署中，可流式 HTTP 传输正在取代 SSE 传输。
+
+```py
+from mcp.server.fastmcp import FastMCP
+
+# Stateful server (maintains session state)
+mcp = FastMCP("StatefulServer")
+
+# Stateless server (no session persistence)
+mcp = FastMCP("StatelessServer", stateless_http=True)
+
+# Stateless server (no session persistence, no sse stream with supported client)
+mcp = FastMCP("StatelessServer", stateless_http=True, json_response=True)
+
+# Run server with streamable_http transport
+mcp.run(transport="streamable-http")
+```
+
+### 挂载到现有的 ASGI 服务器
+
+- 注意：SSE 传输正在被Streamable HTTP 传输取代。
+
+```py
+from starlette.applications import Starlette
+from starlette.routing import Mount, Host
+from mcp.server.fastmcp import FastMCP
+
+
+mcp = FastMCP("My App")
+
+# Mount the SSE server to the existing ASGI server
+app = Starlette(
+    routes=[
+        Mount('/', app=mcp.sse_app()),
+    ]
+)
+
+# or dynamically mount as host
+app.router.routes.append(Host('mcp.acme.corp', app=mcp.sse_app()))
+```
 
 ## 相关文档
 
