@@ -5,7 +5,7 @@
 ## 项目
 
 - [Python FastMCP Server](./py-fastmcp-server/README.md)
-- [IDE-MCP部署示例](./docs/IDE-MCP部署示例.md)
+- [Python FastMCP Server V2](./py-fastmcp-server-v2/README.md)
 
 ## 参考资料
 
