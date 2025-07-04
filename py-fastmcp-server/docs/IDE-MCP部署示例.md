@@ -27,9 +27,9 @@
 
 ```json
 "py-fastmcp-server": {
-    "name": "py-fastmcp-server2",
+    "name": "py-fastmcp-server",
     "type": "streamable-http",
-    "url": "http://127.0.0.1:8000/mcp"
+    "url": "http://127.0.0.1:8000/sse"
 }
 ```
 
@@ -89,9 +89,9 @@
 
 ```json
 "py-fastmcp-server": {
-    "name": "py-fastmcp-server2",
+    "name": "py-fastmcp-server",
     "type": "streamable-http",
-    "url": "http://127.0.0.1:8000/mcp"
+    "url": "http://127.0.0.1:8000/sse"
 }
 ```
 
