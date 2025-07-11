@@ -1,0 +1,18 @@
+{
+  "compilerOptions": { // TypeScript 编译器的全局配置项
+    "target": "ES2023", // 将代码编译为 ECMAScript 2023 标准，支持最新的 JavaScript 特性
+    "module": "NodeNext", // 使用 Node.js 原生的模块系统（.mjs/.cjs 文件扩展名自动识别）
+    "moduleResolution": "NodeNext", // 按照 Node.js 的模块解析规则查找依赖（兼容 package.json 的 exports 字段）
+    "esModuleInterop": true, // 允许 CommonJS 和 ES 模块互操作（如 import React from 'react' 写法）
+    "forceConsistentCasingInFileNames": true, // 强制文件名大小写敏感（避免跨平台系统的大小写冲突）
+    "strict": true, // 启用所有严格类型检查（包括空值检查、隐式 any 类型报错等）
+    "skipLibCheck": true, // 跳过第三方库的类型检查（提升编译速度，但可能降低类型安全性）
+    "outDir": "dist", // 输出编译后的文件到 dist 目录（与源代码分离）
+    "rootDir": "src", // 指定源代码根目录为 src（编译器仅编译此目录下的文件）
+    "sourceMap": true, // 生成 .map 文件（便于调试时映射编译后代码到源代码）
+    "declaration": true, // 生成 .d.ts 类型声明文件（供其他 TypeScript 项目使用你的库）
+    "resolveJsonModule": true // 允许直接导入 JSON 文件（如 import data from './data.json'）
+  },
+  "include": ["src/**/*"], // 指定编译范围：src 目录及其子目录下的所有文件
+  "exclude": ["node_modules", "dist"] // 排除编译范围：node_modules 和 dist 目录下的所有文件
+}
