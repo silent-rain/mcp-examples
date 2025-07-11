@@ -2,6 +2,7 @@
   "recommendations": [
     "rust-lang.rust-analyzer",
     "ms-python.black-formatter",
+    "vue.volar",
     "inferrinizzard.prettier-sql-vscode"
   ]
 }
