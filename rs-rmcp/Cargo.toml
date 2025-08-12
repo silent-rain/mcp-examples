@@ -1,0 +1,32 @@
+[package]
+name = "rs-mcpr"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# rmcp = { git = "https://github.com/modelcontextprotocol/rust-sdk", branch = "main", features = [
+#     "transport-streamable-http-server",
+# ] }
+rmcp = { version = "0.5", features = [
+    "transport-streamable-http-server",
+    "transport-worker",
+    "transport-sse-server",
+    "transport-io",
+] }
+axum = "0.8"
+tokio = { version = "1.0", features = ["signal", "rt-multi-thread"] }
+tokio-util = "0.7.16"
+anyhow = "1.0"
+serde = "1.0"
+serde_json = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+regex = "1.11"
+
+
+log = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = [
+    "env-filter",
+    "std",
+    "fmt",
+] }

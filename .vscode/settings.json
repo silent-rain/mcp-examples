@@ -4,6 +4,7 @@
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "rust-analyzer.linkedProjects": [
+        "./rs-rmcp/Cargo.toml"
     ],
     "rust-analyzer.cargo.extraEnv": {
     },
