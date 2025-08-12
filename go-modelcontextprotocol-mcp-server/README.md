@@ -1,4 +1,4 @@
-# Go 官方mcp使用示例
+# Go 官方 MCP Server
 
 - 当前SDK尚未稳定, 使用的是指定的commit版本
 
