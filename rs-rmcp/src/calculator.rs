@@ -107,7 +107,7 @@ impl Calculator {
     }
 }
 
-/// resource
+/// resource/prompt
 #[tool_handler]
 impl Calculator {
     /// Static resource example - exposing a README file
