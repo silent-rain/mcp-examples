@@ -1,7 +1,7 @@
 # MCP 服务端
 
 from fastmcp import Context, FastMCP
-from fastmcp.prompts.prompt import Message, PromptMessage, Role
+from fastmcp.prompts.prompt import Message, PromptMessage, TextContent
 import httpx
 from pydantic import BaseModel, Field
 from PIL import Image as PILImage
@@ -43,16 +43,16 @@ def get_greeting(name: str) -> str:
     return f"Hello, {name}!"
 
 
-@mcp.resource("config://app", title="Application Configuration")
-def get_config() -> str:
-    """Static configuration data"""
-    return "App configuration here"
-
-
 @mcp.resource("users://{user_id}/profile", title="User Profile")
 def get_user_profile(user_id: str) -> str:
     """Dynamic user data"""
     return f"Profile data for user {user_id}"
+
+
+@mcp.resource("config://app", title="Application Configuration")
+def get_config() -> str:
+    """Static configuration data"""
+    return "App configuration here"
 
 
 @mcp.resource("file://some/path")
@@ -67,14 +67,27 @@ def review_code(code: str) -> str:
     return f"Please review this code:\n\n{code}"
 
 
+@mcp.prompt
+def roleplay_scenario(character: str, situation: str) -> list[Message]:
+    """Sets up a roleplaying scenario with initial messages."""
+    return [
+        Message(f"Let's roleplay. You are {character}. The situation is: {situation}"),
+        Message("Okay, I understand. I am ready. What happens next?", role="assistant"),
+    ]
+
+
 # 虽然 FastMCP 从您的函数中推断出名称和描述，但您可以覆盖这些并使用@mcp.prompt装饰器的参数添加其他元数据：
 @mcp.prompt(title="Debug Assistant")
-def debug_error(error: str) -> list[Message]:
+def debug_error(err: str) -> list[PromptMessage]:
     return [
-        PromptMessage(content="I'm seeing this error:", role="user"),
-        PromptMessage(content=error, role="user"),
         PromptMessage(
-            content="I'll help debug that. What have you tried so far?",
+            content=TextContent(type="text", text="I'm seeing this error:"), role="user"
+        ),
+        PromptMessage(content=TextContent(type="text", text=f"{err}"), role="user"),
+        PromptMessage(
+            content=TextContent(
+                type="text", text="I'll help debug that. What have you tried so far?"
+            ),
             role="assistant",
         ),
     ]

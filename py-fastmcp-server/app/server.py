@@ -27,16 +27,17 @@ def get_greeting(name: str) -> str:
     return f"Hello, {name}!"
 
 
-@mcp.resource("config://app", title="Application Configuration")
-def get_config() -> str:
-    """Static configuration data"""
-    return "App configuration here"
-
-
 @mcp.resource("users://{user_id}/profile", title="User Profile")
 def get_user_profile(user_id: str) -> str:
     """Dynamic user data"""
     return f"Profile data for user {user_id}"
+
+
+# Add a static configuration resource
+@mcp.resource("config://app", title="Application Configuration")
+def get_config() -> str:
+    """Static configuration data"""
+    return "App configuration here"
 
 
 @mcp.resource("file://some/path")

@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "rs-rmcp"
+		},
+		{
+			"path": "py-fastmcp-server-v2"
 		}
 	],
 	"settings": {
