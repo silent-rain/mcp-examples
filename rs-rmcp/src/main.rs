@@ -7,6 +7,9 @@ use rmcp::transport::streamable_http_server::{
 };
 use rmcp::{ServiceExt, transport::stdio};
 
+mod error;
+mod extract;
+
 mod calculator;
 use calculator::Calculator;
 

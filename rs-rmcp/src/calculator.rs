@@ -108,7 +108,6 @@ impl Calculator {
 }
 
 /// resource/prompt
-#[tool_handler]
 impl Calculator {
     /// Static resource example - exposing a README file
     pub fn readme(&self, uri: String) -> Result<ReadResourceResult, McpError> {
