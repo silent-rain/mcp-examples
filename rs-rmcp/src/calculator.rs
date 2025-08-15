@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-
-use regex::Regex;
 use rmcp::{
     ErrorData as McpError, RoleServer, ServerHandler,
     handler::server::{router::tool::ToolRouter, tool::Parameters},
@@ -18,6 +15,8 @@ use rmcp::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value, json};
+
+use crate::extract::Path;
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
 pub struct SumRequest {
@@ -130,7 +129,7 @@ impl Calculator {
     pub fn dynamic_resource_by_id(
         &self,
         uri: &str,
-        id: &str,
+        id: i32,
     ) -> Result<ReadResourceResult, McpError> {
         let text = format!("read: //dynamic/resource/{id}").to_string();
 
@@ -168,36 +167,6 @@ impl Calculator {
     }
 }
 
-impl Calculator {
-    /// 通用的动态路径参数提取函数
-    /// - `uri`: 输入的 URI（如 "test://dynamic/resource/123"）
-    /// - `pattern`: 动态路径模式（如 "test://dynamic/resource/{id}"）
-    /// - 返回一个 `HashMap`，包含所有提取的参数（键为参数名，值为参数值）
-    fn extract_dynamic_params(uri: &str, pattern: &str) -> Option<HashMap<String, String>> {
-        // 将模式转换为正则表达式
-        // 例如：将 "{id}" 转换为 "(?P<id>[^/]+)"
-        let regex_pattern = pattern.replace("{", "(?P<").replace("}", ">[^/]+)");
-        let re = Regex::new(&regex_pattern).ok()?;
-
-        // 匹配并提取所有命名捕获组
-        let captures = re.captures(uri)?;
-        let mut params = HashMap::new();
-
-        // 遍历所有命名捕获组
-        for name in re.capture_names().flatten() {
-            if let Some(value) = captures.name(name).map(|m| m.as_str().to_string()) {
-                params.insert(name.to_string(), value);
-            }
-        }
-
-        if params.is_empty() {
-            None
-        } else {
-            Some(params)
-        }
-    }
-}
-
 #[tool_handler]
 impl ServerHandler for Calculator {
     async fn initialize(
@@ -213,6 +182,7 @@ impl ServerHandler for Calculator {
         Ok(self.get_info())
     }
 
+    /// 服务器信息
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             instructions: Some("A simple calculator".into()),
@@ -291,16 +261,14 @@ impl ServerHandler for Calculator {
         ReadResourceRequestParam { uri }: ReadResourceRequestParam,
         _: RequestContext<RoleServer>,
     ) -> Result<ReadResourceResult, McpError> {
-        if let Some(data) = Self::extract_dynamic_params(&uri, "test://dynamic/resource/{id}") {
-            let id = data["id"].clone();
-            return self.dynamic_resource_by_id(&uri, &id);
-        } else if let Some(data) =
-            Self::extract_dynamic_params(&uri, "file:///documents/{name}.text")
-        {
-            let name = data["name"].clone();
+        if let Ok((id,)) = Path::<(i32,)>::extract(&uri, "test://dynamic/resource/{id}") {
+            return self.dynamic_resource_by_id(&uri, id);
+        }
+        if let Ok((name,)) = Path::<(String,)>::extract(&uri, "file:///documents/{name}.text") {
             return self.dynamic_resource_by_name(&uri, &name);
         }
 
+        // 静态路由匹配
         match uri.as_str() {
             "docs://readme" => self.readme(uri),
             "file:///documents/report.pdf" => self.report_pdf(uri),

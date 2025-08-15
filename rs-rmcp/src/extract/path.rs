@@ -1,5 +1,6 @@
-//! 提取器
+//! Path 提取器
 
+use regex::Regex;
 use serde::de::DeserializeOwned;
 use serde_json::{self, Value};
 use std::collections::BTreeMap;
@@ -46,10 +47,55 @@ where
     }
 
     /// 从 URL 和模式中提取键值对
+    /// 使用正则表达式进行更精确的参数提取
     fn extract_params(
         url: &str,
         pattern: &str,
     ) -> Result<BTreeMap<String, Value>, PathExtractionError> {
+        // 特殊处理文件扩展名格式，如 "file:///documents/{name}.text"
+        if pattern.contains("{") && pattern.contains("}") && pattern.contains(".") {
+            // 将模式转换为正则表达式
+            let regex_pattern = pattern
+                .replace(".", "\\.") // 转义点号
+                .replace("{", "(?P<")
+                .replace("}", ">[^/\\.]+)");
+
+            let re = Regex::new(&regex_pattern).map_err(|_| PathExtractionError::InvalidFormat)?;
+
+            // 尝试匹配并提取参数
+            if let Some(captures) = re.captures(url) {
+                let mut params = BTreeMap::new();
+
+                // 提取所有命名捕获组
+                for name in re.capture_names().flatten() {
+                    if let Some(value_match) = captures.name(name) {
+                        let value_str = value_match.as_str();
+
+                        // 尝试将字符串转换为适当的类型
+                        let value = if let Ok(int_val) = value_str.parse::<i64>() {
+                            Value::Number(int_val.into())
+                        } else if value_str.contains('.') && value_str.parse::<f64>().is_ok() {
+                            let float_val = value_str.parse::<f64>().unwrap();
+                            Value::Number(serde_json::Number::from_f64(float_val).unwrap())
+                        } else if value_str == "true" {
+                            Value::Bool(true)
+                        } else if value_str == "false" {
+                            Value::Bool(false)
+                        } else {
+                            Value::String(value_str.to_string())
+                        };
+
+                        params.insert(name.to_string(), value);
+                    }
+                }
+
+                return Ok(params);
+            }
+
+            return Err(PathExtractionError::InvalidFormat);
+        }
+
+        // 标准路径分段处理
         let url_segments: Vec<&str> = url.split('/').filter(|s| !s.is_empty()).collect();
         let pattern_segments: Vec<&str> = pattern.split('/').filter(|s| !s.is_empty()).collect();
 
@@ -139,6 +185,47 @@ mod tests {
         match Path::<(String, String)>::extract(url, pattern) {
             Ok(v) => println!("String Tuple: {:?}", v),
             Err(e) => println!("Error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_extract_tuple2() {
+        let url = "file:///documents/xxxx.text";
+        let pattern = "file:///documents/{name}.text";
+
+        // 测试提取为元组
+        match Path::<(String,)>::extract(url, pattern) {
+            Ok(v) => println!("Tuple: {:?}", v),
+            Err(e) => println!("Error: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_extract_file_extension() {
+        // 测试文件扩展名格式
+        let test_cases = vec![
+            (
+                "file:///documents/report.text",
+                "file:///documents/{name}.text",
+            ),
+            (
+                "file:///documents/user-data.json",
+                "file:///documents/{name}.json",
+            ),
+            ("file:///images/photo-2023.jpg", "file:///images/{name}.jpg"),
+            ("test://dynamic/resource/42", "test://dynamic/resource/{id}"),
+            (
+                "file:///documents/asdas.text",
+                "file:///documents/{name}.text",
+            ),
+        ];
+
+        for (url, pattern) in test_cases {
+            println!("Testing: {} with pattern {}", url, pattern);
+            match Path::<BTreeMap<String, Value>>::extract(url, pattern) {
+                Ok(params) => println!("Success: {:?}", params),
+                Err(e) => println!("Error: {}", e),
+            }
         }
     }
 }

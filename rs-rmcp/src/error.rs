@@ -4,7 +4,10 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
-    SerdeJsonError(#[from] serde_json::error::Error),
+    SerdeJson(#[from] serde_json::error::Error),
+
+    #[error(transparent)]
+    Regex(#[from] regex::Error),
 
     #[error(transparent)]
     PathExtractionError(#[from] PathExtractionError),

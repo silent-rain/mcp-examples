@@ -903,6 +903,7 @@ dependencies = [
  "anyhow",
  "axum",
  "clap",
+ "lazy_static",
  "log",
  "regex",
  "rmcp",
