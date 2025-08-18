@@ -1,11 +1,14 @@
-use std::env;
-
+use clap::{Parser, ValueEnum};
 use log::{error, info};
-use rmcp::transport::sse_server::{SseServer, SseServerConfig};
-use rmcp::transport::streamable_http_server::{
-    StreamableHttpService, session::local::LocalSessionManager,
+use rmcp::{
+    ServiceExt,
+    transport::{
+        sse_server::{SseServer, SseServerConfig},
+        stdio,
+        streamable_http_server::{StreamableHttpService, session::local::LocalSessionManager},
+    },
 };
-use rmcp::{ServiceExt, transport::stdio};
+use tracing_subscriber::fmt::format::FmtSpan;
 
 mod error;
 mod extract;
@@ -13,27 +16,49 @@ mod extract;
 mod calculator;
 use calculator::Calculator;
 
-const BIND_ADDRESS: &str = "127.0.0.1:8000";
+#[derive(Debug, Clone, ValueEnum)]
+enum Transport {
+    Stdio,
+    Http,
+}
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Transport type to use (stdio or http)
+    #[arg(short, long, value_enum, default_value = "http")]
+    transport: Transport,
+
+    /// Server address for HTTP transport (format: host:port)
+    #[arg(short, long, default_value = "127.0.0.1:8000")]
+    address: String,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     init_log();
 
-    // 获取所有命令行参数
-    let args: Vec<String> = env::args().collect();
+    // Parse command line arguments using clap
+    let args = Args::parse();
+    info!(
+        "args transport: {:?}, address: {}",
+        args.transport, args.address
+    );
 
-    info!("args: {args:?}");
-
-    if args.len() > 1 && args[1] == "stdio" {
-        stdio_server().await?;
-        return Ok(());
+    match args.transport {
+        Transport::Stdio => {
+            stdio_server().await?;
+            return Ok(());
+        }
+        Transport::Http => {
+            start_http_server(&args.address).await?;
+        }
     }
-
-    start_server().await?;
 
     Ok(())
 }
 
+/// Initializes a logger.
 fn init_log() {
     tracing_subscriber::fmt()
         .compact()
@@ -44,14 +69,15 @@ fn init_log() {
         .with_line_number(true)
         .with_target(false)
         .log_internal_errors(true)
-        .with_span_events(tracing_subscriber::fmt::format::FmtSpan::CLOSE)
+        .with_span_events(FmtSpan::CLOSE)
         .init();
 }
 
+/// Starts TCP server to communicate with standard input/output
 async fn stdio_server() -> anyhow::Result<()> {
     // Create an instance of our Calculator router
     let service = Calculator::new().serve(stdio()).await.inspect_err(|e| {
-        tracing::error!("serving error: {:?}", e);
+        tracing::error!("stdio serving error: {:?}", e);
     })?;
 
     service.waiting().await?;
@@ -59,7 +85,8 @@ async fn stdio_server() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn start_server() -> anyhow::Result<()> {
+/// Starts SSE and HTTP servers
+async fn start_http_server(address: &str) -> anyhow::Result<()> {
     let http_service = StreamableHttpService::new(
         || Ok(Calculator::new()),
         LocalSessionManager::default().into(),
@@ -67,7 +94,7 @@ async fn start_server() -> anyhow::Result<()> {
     );
 
     let sse_config = SseServerConfig {
-        bind: BIND_ADDRESS.parse()?,
+        bind: address.parse()?,
         sse_path: "/sse".to_string(),
         post_path: "/message".to_string(),
         ct: tokio_util::sync::CancellationToken::new(),
@@ -101,8 +128,8 @@ async fn start_server() -> anyhow::Result<()> {
     // });
 
     // Start HTTP server
-    info!("MCP Server started on {}", BIND_ADDRESS);
-    let listener = tokio::net::TcpListener::bind(BIND_ADDRESS).await?;
+    info!("MCP Server started on {}", address);
+    let listener = tokio::net::TcpListener::bind(address).await?;
     let server = axum::serve(listener, app).with_graceful_shutdown(async move {
         // sse_cancel_token2.cancelled().await;
         tokio::signal::ctrl_c().await.unwrap();

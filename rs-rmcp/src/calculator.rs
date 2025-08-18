@@ -3,11 +3,11 @@ use rmcp::{
     handler::server::{router::tool::ToolRouter, tool::Parameters},
     model::{
         AnnotateAble, CallToolResult, Content, GetPromptRequestMethod, GetPromptRequestParam,
-        GetPromptResult, InitializeRequestParam, InitializeResult, JsonObject, ListPromptsResult,
-        ListResourceTemplatesResult, ListResourcesResult, PaginatedRequestParam, Prompt,
-        PromptArgument, PromptMessage, PromptMessageContent, PromptMessageRole, RawResource,
-        RawResourceTemplate, ReadResourceRequestParam, ReadResourceResult, ResourceContents,
-        ServerCapabilities, ServerInfo,
+        GetPromptResult, Implementation, InitializeRequestParam, InitializeResult, JsonObject,
+        ListPromptsResult, ListResourceTemplatesResult, ListResourcesResult, PaginatedRequestParam,
+        Prompt, PromptArgument, PromptMessage, PromptMessageContent, PromptMessageRole,
+        RawResource, RawResourceTemplate, ReadResourceRequestParam, ReadResourceResult,
+        ResourceContents, ServerCapabilities, ServerInfo,
     },
     schemars,
     service::RequestContext,
@@ -186,6 +186,7 @@ impl ServerHandler for Calculator {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             instructions: Some("A simple calculator".into()),
+            server_info: Implementation::from_build_env(),
             capabilities: ServerCapabilities::builder()
                 // .enable_logging()
                 .enable_experimental()

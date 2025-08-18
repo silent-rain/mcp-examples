@@ -15,14 +15,17 @@ rmcp = { version = "0.5", features = [
 ] }
 axum = "0.8"
 tokio = { version = "1.0", features = ["signal", "rt-multi-thread"] }
-tokio-util = "0.7.16"
-anyhow = "1.0"
+tokio-util = "0.7"
 serde = "1.0"
 serde_json = "1.0"
-clap = { version = "4.5", features = ["derive"] }
 regex = "1.11"
-thiserror = "2.0"
 lazy_static = "1.4"
+clap = { version = "4.5", features = ["derive"] }
+
+
+thiserror = "2.0"
+anyhow = "1.0"
+
 
 log = "0.4"
 tracing = "0.1"

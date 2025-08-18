@@ -1,9 +1,9 @@
 //! Path 提取器
+use std::collections::BTreeMap;
 
 use regex::Regex;
 use serde::de::DeserializeOwned;
 use serde_json::{self, Value};
-use std::collections::BTreeMap;
 
 use crate::error::{Error, PathExtractionError};
 
